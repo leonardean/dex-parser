@@ -4,7 +4,8 @@ var fs = require('fs')
 
 var dirPath = "/home/pi/Documents/vendingCPDataBuffer/"
 var filePath = dirPath + "dexRaw/dex_data.txt"
-var prevData = JSON.parse(fs.readFileSync(dirPath + "dexJson/prev_products.txt", 'utf8')) || undefined
+var prevDataPath = dirPath + "dexJson/prev_data.txt"
+//var prevData = JSON.parse(fs.readFileSync(dirPath + "dexJson/prev_data.txt", 'utf8')) || undefined
 var remainingUnit = 8890
 
 listenToLogs((path) => {
@@ -14,6 +15,12 @@ listenToLogs((path) => {
 				console.log("===============================DATA==================================")
 				console.log(data)
 				console.log("===============================DATA==================================")
+				fs.writeFile(prevDataPath, JSON.stringify(data), 'utf8', function(err) {
+						if (err) {
+							 return console.log(err);
+						};
+				});
+				/*
 				if (prevData !== undefined) {
 					prevProducts = prevData.products
 					currProducts = data.products
@@ -173,6 +180,7 @@ listenToLogs((path) => {
 			        };
 			    });
 				}
+				*/
 			})
 		} else {
 			console.log(err)
