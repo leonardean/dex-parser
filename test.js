@@ -36,77 +36,78 @@ listenToLogs((path) => {
 				console.log("===============================DATA==================================")
 				console.log(data)
 				console.log("===============================DATA==================================")
-				fs.writeFile(prevDataPath, JSON.stringify(data), 'utf8', function(err) {
-						if (err) {
-							 return console.log(err);
-						};
-				});
+				if (!(data == undefined || data == "")){
+					fs.writeFile(prevDataPath, JSON.stringify(data), 'utf8', function(err) {
+							if (err) {
+								 return console.log(err);
+							};
+					});
 
-				if (prevData !== undefined) {
-					var prevProducts = prevData.products
-					var currProducts = data.products
+					if (prevData !== undefined) {
+						var prevProducts = prevData.products
+						var currProducts = data.products
 
-					// error check
-					var prevEvents = prevData.events == undefined ? undefined : prevData.events.map((event) => {
-						if (event.eventActivity == '1')
-							return event
-					})
-					console.log(prevEvents)
+						// error check
+						var prevEvents = prevData.events == undefined ? undefined : prevData.events.map((event) => {
+							if (event.eventActivity == '1')
+								return event
+						})
+						console.log(prevEvents)
 
-					var currEvents = data.events == undefined ? undefined : data.events.map((event) => {
-						if (event.eventActivity == '0') {
-							if (prevevents == undefined || prevEvents == [])
-								console.log("previous events are empty")
-							else {
+						var currEvents = data.events == undefined ? undefined : data.events.map((event) => {
+							if (event.eventActivity == '0') {
+								if (prevevents == undefined || prevEvents == [])
+									console.log("previous events are empty")
+								else {
+									prevEvents.forEach((prevEvent) => {
+										if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
+											updateEvent(event.eventIdentification, 'OPEN', ()=>{
+												prevData = data
+											})
+										}
+									})
+								}
+							} else if (event.eventActivity == '1') {
 								prevEvents.forEach((prevEvent) => {
-									if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
-										updateEvent(event.eventIdentification, 'OPEN', ()=>{
+									if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '0') {
+										updateEvent(event.eventIdentification, 'FIXED', ()=>{
 											prevData = data
 										})
 									}
 								})
 							}
-						} else if (event.eventActivity == '1') {
-							prevEvents.forEach((prevEvent) => {
-								if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '0') {
-									updateEvent(event.eventIdentification, 'FIXED', ()=>{
-										prevData = data
-									})
+						})
+						// products transaction check
+						for (var i = 0; i < prevProducts.length; i ++) {
+							if (prevProducts[i].sold !== currProducts[i].sold) {
+								var dateStamp = (new Date()).toISOString().substr(0, 10);
+								var log = {
+									"code": 7,
+									"occurred": (new Date()).toISOString(),
+									"metaData": {
+										"remaining": remainingUnit,
+										"cost": prevProducts[i].price * 100,
+										"productId": "PR-eceacade-f859-0bc1-b1a0-904d607b16f0",
+										"locationId": "canister2",
+										"paymentType": "Cash"
+									}
 								}
-							})
-						}
-					})
-					// products transaction check
-					for (var i = 0; i < prevProducts.length; i ++) {
-						if (prevProducts[i].sold !== currProducts[i].sold) {
-							var dateStamp = (new Date()).toISOString().substr(0, 10);
-							var log = {
-								"code": 7,
-								"occurred": (new Date()).toISOString(),
-								"metaData": {
-									"remaining": remainingUnit,
-									"cost": prevProducts[i].price * 100,
-									"productId": "PR-eceacade-f859-0bc1-b1a0-904d607b16f0",
-									"locationId": "canister2",
-									"paymentType": "Cash"
-								}
+								fs.appendFile(dirPath + "agentLogs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
+						        console.log("Log appended");
+						        prevData = data
+						        remainingUnit = remainingUnit - 1
+						    });
 							}
-							fs.appendFile(dirPath + "agentLogs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
-					        console.log("Log appended");
-					        prevData = data
-					        remainingUnit = remainingUnit - 1
-					    });
 						}
+					} else {
+						prevData = data
+						fs.writeFile(dirPath + "dexJson/prev_data.txt", JSON.stringify(data), 'utf8', function(err) {
+				        if (err) {
+				           return console.log(err);
+				        };
+				    });
 					}
-				} else {
-					prevData = data
-					fs.writeFile(dirPath + "dexJson/prev_products.txt", JSON.stringify(data), 'utf8', function(err) {
-			        if (err) {
-			           return console.log(err);
-			        };
-			    });
 				}
-
 			})
 		} else {
 			console.log(err)
