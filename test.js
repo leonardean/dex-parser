@@ -68,10 +68,10 @@ listenToLogs((path) => {
 								if (prevEvents == undefined || prevEvents == [])
 									console.log("previous events are empty")
 								else {
-									prevEvents.forEach((prevEvent) => {
+									prevEvents.forEach((prevEvent, index, currentArray) => {
 										if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
 											updateEvent(event.eventIdentification, 'FIXED', ()=>{
-												prevData = data
+												currentArray.splice(index, 1)
 											})
 										}
 									})
@@ -85,7 +85,6 @@ listenToLogs((path) => {
 								})
 								if (newEvent == true) {
 									updateEvent(event.eventIdentification, 'OPEN', ()=>{
-										prevData = data
 									})
 								}
 							}
@@ -107,11 +106,12 @@ listenToLogs((path) => {
 								}
 								fs.appendFile(dirPath + "agentLogs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
 						        console.log("Log appended");
-						        prevData = data
+
 						        remainingUnit = remainingUnit - 1
 						    });
 							}
 						}
+						prevData = data
 					} else {
 						prevData = data
 						fs.writeFile(dirPath + "dexJson/prev_data.txt", JSON.stringify(data), 'utf8', function(err) {
