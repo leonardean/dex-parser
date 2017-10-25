@@ -59,11 +59,9 @@ listenToLogs((path) => {
 						// error check
 						var prevEvents = []
 						prevData.events.forEach((event) => {
-							console.log("lala")
 							if (event.eventActivity == '1')
 								prevEvents.push(event)
 						})
-						console.log(prevEvents)
 
 						data.events.map((event) => {
 							if (event.eventActivity == '0') {
@@ -81,12 +79,10 @@ listenToLogs((path) => {
 							} else if (event.eventActivity == '1') {
 								var newEvent = true
 								prevEvents.forEach((prevEvent) => {
-									console.log(1)
 									if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
 										newEvent = false
 									}
 								})
-								console.log(2)
 								if (newEvent == true) {
 									updateEvent(event.eventIdentification, 'OPEN', ()=>{
 										prevData = data
