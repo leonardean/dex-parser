@@ -2,9 +2,9 @@ var dexparse = require('dex-parse')
 var chokidar = require('chokidar')
 var fs = require('fs')
 
-var dirPath = "/Users/leonardean/Desktop/vendingMachine/"
-var filePath = dirPath + "dex_data.txt"
-var prevData = JSON.parse(fs.readFileSync(dirPath + "prev_products.txt", 'utf8')) || undefined
+var dirPath = "/home/pi/Documents/vendingCPDataBuffer/"
+var filePath = dirPath + "dexRaw/dex_data.txt"
+var prevData = JSON.parse(fs.readFileSync(dirPath + "dexJson/prev_products.txt", 'utf8')) || undefined
 var remainingUnit = 8890
 
 listenToLogs((path) => {
@@ -13,7 +13,7 @@ listenToLogs((path) => {
 			dexparse.readText(data, function(err, data) {
 				console.log("===============================DATA==================================")
 				console.log(data)
-				console.log("===============================DATA==================================")				
+				console.log("===============================DATA==================================")
 				if (prevData !== undefined) {
 					prevProducts = prevData.products
 					currProducts = data.products
@@ -77,10 +77,10 @@ listenToLogs((path) => {
 									        };
 									    });
 										});
-									}									
+									}
 								}
 						} else if (data.machine.event.eventActivity == '0') {
-							if (prevData.machine.event !== undefined) 
+							if (prevData.machine.event !== undefined)
 								if (prevData.machine.event.eventActivity == '1') {
 									// report fixed
 									if (data.machine.event.eventIdentification == "OBH") {
@@ -167,7 +167,14 @@ listenToLogs((path) => {
 					}
 				} else {
 					prevData = data
-					fs.writeFile(dirPath + "prev_products.txt", JSON.stringify(data), 'utf8', function(err) {
+					fs.writeFile(dirPath + "dexJson/prev_products.txt", JSON.stringify(data), 'utf8', function(err) {
+			        if (err) {
+			           return console.log(err);
+			        };
+			    });
+				} else {
+					prevData = data
+					fs.writeFile(dirPath + "dexJson/prev_products.txt", JSON.stringify(data), 'utf8', function(err) {
 			        if (err) {
 			           return console.log(err);
 			        };
@@ -192,15 +199,14 @@ function listenToLogs(cb) {
     watcher
         .on('add', function(path) {
             console.log("File has been added: " + path);
-            if (path == dirPath + "dex_data.txt")
+            if (path == filePath)
             	cb(path);
         })
         .on('change', function(path) {
             console.log("File has been changed: " + path);
-            if (path == dirPath + "dex_data.txt")
+            if (path == filePath)
             	cb(path);
         });
 
     watcher.add(dirPath);
 }
-
