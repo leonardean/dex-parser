@@ -45,22 +45,27 @@ listenToLogs((path) => {
 				if (prevData !== undefined) {
 					var prevProducts = prevData.products
 					var currProducts = data.products
+
+					// error check
 					var prevEvents = prevData.events == undefined ? undefined : prevData.events.map((event) => {
 						if (event.eventActivity == '1')
 							return event
 					})
-
-					// error check
+					console.log(prevEvents)
 
 					var currEvents = data.events == undefined ? undefined : data.events.map((event) => {
 						if (event.eventActivity == '0') {
-							prevEvents.forEach((prevEvent) => {
-								if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
-									updateEvent(event.eventIdentification, 'OPEN', ()=>{
-										prevData = data
-									})
-								}
-							})
+							if (prevevents == undefined || prevEvents == [])
+								console.log("previous events are empty")
+							else {
+								prevEvents.forEach((prevEvent) => {
+									if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
+										updateEvent(event.eventIdentification, 'OPEN', ()=>{
+											prevData = data
+										})
+									}
+								})
+							}
 						} else if (event.eventActivity == '1') {
 							prevEvents.forEach((prevEvent) => {
 								if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '0') {
