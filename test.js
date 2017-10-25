@@ -172,13 +172,6 @@ listenToLogs((path) => {
 			           return console.log(err);
 			        };
 			    });
-				} else {
-					prevData = data
-					fs.writeFile(dirPath + "dexJson/prev_products.txt", JSON.stringify(data), 'utf8', function(err) {
-			        if (err) {
-			           return console.log(err);
-			        };
-			    });
 				}
 			})
 		} else {
