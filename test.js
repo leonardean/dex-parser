@@ -81,10 +81,12 @@ listenToLogs((path) => {
 							} else if (event.eventActivity == '1') {
 								var newEvent = true
 								prevEvents.forEach((prevEvent) => {
+									console.log(1)
 									if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
 										newEvent = false
 									}
 								})
+								console.log(2)
 								if (newEvent == true) {
 									updateEvent(event.eventIdentification, 'OPEN', ()=>{
 										prevData = data
