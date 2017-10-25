@@ -5,8 +5,29 @@ var fs = require('fs')
 var dirPath = "/home/pi/Documents/vendingCPDataBuffer/"
 var filePath = dirPath + "dexRaw/dex_data.txt"
 var prevDataPath = dirPath + "dexJson/prev_data.txt"
-//var prevData = JSON.parse(fs.readFileSync(dirPath + "dexJson/prev_data.txt", 'utf8')) || undefined
+var prevData = JSON.parse(fs.readFileSync(dirPath + "dexJson/prev_data.txt", 'utf8')) || undefined
 var remainingUnit = 8890
+
+var eventName2Code = {
+	'OBH': 1010,
+	'EBJ': 1009,
+	'EDT_1': 1008
+}
+
+function updateEvent(eventName, eventStatus, cb) {
+	var dateStamp = (new Date()).toISOString().substr(0, 10);
+	var log = {
+		"code": eventName2Code[eventName],
+		"occurred": (new Date()).toISOString(),
+		"metaData": {
+			"status": eventStatus
+		}
+	}
+	fs.appendFile(dirPath + "agentLogs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
+		console.log("Log appended");
+		cb()
+	});
+}
 
 listenToLogs((path) => {
 	fs.readFile(path, {encoding: 'utf-8'}, function(err, data) {
@@ -20,135 +41,36 @@ listenToLogs((path) => {
 							 return console.log(err);
 						};
 				});
-				/*
-				if (prevData !== undefined) {
-					prevProducts = prevData.products
-					currProducts = data.products
-					// error check
-					if (data.machine.event !== undefined) {
-						if (data.machine.event.eventActivity == '1') {
-							if (prevData.machine.event !== undefined)
-								if (prevData.machine.event.eventActivity == '0') {
-									// report error
-									if (data.machine.event.eventIdentification == "OBH") {
-										var dateStamp = (new Date()).toISOString().substr(0, 10);
-										var log = {
-											"code": 1010,
-											"occurred": (new Date()).toISOString(),
-											"metaData": {
-												"status": "OPEN"
-											}
-										}
-										fs.appendFile(dirPath + "logs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
-											console.log("Log appended");
-											prevData = data
-											fs.writeFile(dirPath + "prev_products.txt", JSON.stringify(data), 'utf8', function(err) {
-									        if (err) {
-									           return console.log(err);
-									        };
-									    });
-										});
-									} else if (data.machine.event.eventIdentification == "EBJ") {
-										var dateStamp = (new Date()).toISOString().substr(0, 10);
-										var log = {
-											"code": 1009,
-											"occurred": (new Date()).toISOString(),
-											"metaData": {
-												"status": "OPEN"
-											}
-										}
-										fs.appendFile(dirPath + "logs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
-											console.log("Log appended");
-											prevData = data
-											fs.writeFile(dirPath + "prev_products.txt", JSON.stringify(data), 'utf8', function(err) {
-									        if (err) {
-									           return console.log(err);
-									        };
-									    });
-										});
-									} else if (data.machine.event.eventIdentification == "EDT_1") {
-										var dateStamp = (new Date()).toISOString().substr(0, 10);
-										var log = {
-											"code": 1008,
-											"occurred": (new Date()).toISOString(),
-											"metaData": {
-												"status": "OPEN"
-											}
-										}
-										fs.appendFile(dirPath + "logs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
-											console.log("Log appended");
-											prevData = data
-											fs.writeFile(dirPath + "prev_products.txt", JSON.stringify(data), 'utf8', function(err) {
-									        if (err) {
-									           return console.log(err);
-									        };
-									    });
-										});
-									}
-								}
-						} else if (data.machine.event.eventActivity == '0') {
-							if (prevData.machine.event !== undefined)
-								if (prevData.machine.event.eventActivity == '1') {
-									// report fixed
-									if (data.machine.event.eventIdentification == "OBH") {
-										var dateStamp = (new Date()).toISOString().substr(0, 10);
-										var log = {
-											"code": 1010,
-											"occurred": (new Date()).toISOString(),
-											"metaData": {
-												"status": "FIXED"
-											}
-										}
-										fs.appendFile(dirPath + "logs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
-											console.log("Log appended");
-											prevData = data
-											fs.writeFile(dirPath + "prev_products.txt", JSON.stringify(data), 'utf8', function(err) {
-									        if (err) {
-									           return console.log(err);
-									        };
-									    });
-										});
-									} else if (data.machine.event.eventIdentification == "EBJ") {
-										var dateStamp = (new Date()).toISOString().substr(0, 10);
-										var log = {
-											"code": 1009,
-											"occurred": (new Date()).toISOString(),
-											"metaData": {
-												"status": "FIXED"
-											}
-										}
-										fs.appendFile(dirPath + "logs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
-											console.log("Log appended");
-											prevData = data
-											fs.writeFile(dirPath + "prev_products.txt", JSON.stringify(data), 'utf8', function(err) {
-									        if (err) {
-									           return console.log(err);
-									        };
-									    });
-										});
-									} else if (data.machine.event.eventIdentification == "EDT_1") {
-										var dateStamp = (new Date()).toISOString().substr(0, 10);
-										var log = {
-											"code": 1008,
-											"occurred": (new Date()).toISOString(),
-											"metaData": {
-												"status": "FIXED"
-											}
-										}
-										fs.appendFile(dirPath + "logs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
-											console.log("Log appended");
-											prevData = data
-											fs.writeFile(dirPath + "prev_products.txt", JSON.stringify(data), 'utf8', function(err) {
-									        if (err) {
-									           return console.log(err);
-									        };
-									    });
-										});
-									}
-								}
-						}
-					}
 
+				if (prevData !== undefined) {
+					var prevProducts = prevData.products
+					var currProducts = data.products
+					var prevEvents = prevData.events == undefined ? undefined : prevData.events.map((event) => {
+						if (event.eventActivity == '1')
+							return event
+					})
+
+					// error check
+
+					var currEvents = data.events == undefined ? undefined : data.events.map((event) => {
+						if (event.eventActivity == '0') {
+							prevEvents.forEach((prevEvent) => {
+								if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
+									updateEvent(event.eventIdentification, 'OPEN', ()=>{
+										prevData = data
+									})
+								}
+							})
+						} else if (event.eventActivity == '1') {
+							prevEvents.forEach((prevEvent) => {
+								if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '0') {
+									updateEvent(event.eventIdentification, 'FIXED', ()=>{
+										prevData = data
+									})
+								}
+							})
+						}
+					})
 					// products transaction check
 					for (var i = 0; i < prevProducts.length; i ++) {
 						if (prevProducts[i].sold !== currProducts[i].sold) {
@@ -164,8 +86,7 @@ listenToLogs((path) => {
 									"paymentType": "Cash"
 								}
 							}
-							fs.appendFile(dirPath + "logs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
-									console.log(err)
+							fs.appendFile(dirPath + "agentLogs/" + dateStamp, JSON.stringify(log) + "\n", function(err) {
 					        console.log("Log appended");
 					        prevData = data
 					        remainingUnit = remainingUnit - 1
@@ -180,7 +101,7 @@ listenToLogs((path) => {
 			        };
 			    });
 				}
-				*/
+
 			})
 		} else {
 			console.log(err)
