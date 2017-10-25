@@ -68,12 +68,14 @@ listenToLogs((path) => {
 								if (prevEvents == undefined || prevEvents == [])
 									console.log("previous events are empty")
 								else {
-									prevEvents.forEach((prevEvent, index, currentArray) => {
+									prevEvents.every((prevEvent, index) => {
 										if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
 											updateEvent(event.eventIdentification, 'FIXED', ()=>{
-												currentArray.splice(index, 1)
+												prevEvents.splice(index, 1)
+												return false
 											})
 										}
+										return true
 									})
 								}
 							} else if (event.eventActivity == '1') {
