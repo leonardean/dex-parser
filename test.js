@@ -52,37 +52,43 @@ listenToLogs((path) => {
 					});
 
 					if (prevData !== undefined) {
+
 						var prevProducts = prevData.products
 						var currProducts = data.products
 
 						// error check
-						var prevEvents = prevData.events == undefined ? undefined : prevData.events.map((event) => {
+						var prevEvents = []
+						prevData.events.forEach((event) => {
 							if (event.eventActivity == '1')
-								return event
+								prevEvents.push(event)
 						})
 						console.log(prevEvents)
 
-						var currEvents = data.events == undefined ? undefined : data.events.map((event) => {
+						data.events.map((event) => {
 							if (event.eventActivity == '0') {
 								if (prevEvents == undefined || prevEvents == [])
 									console.log("previous events are empty")
 								else {
 									prevEvents.forEach((prevEvent) => {
 										if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
-											updateEvent(event.eventIdentification, 'OPEN', ()=>{
+											updateEvent(event.eventIdentification, 'FIXED', ()=>{
 												prevData = data
 											})
 										}
 									})
 								}
 							} else if (event.eventActivity == '1') {
+								var newEvent = true
 								prevEvents.forEach((prevEvent) => {
-									if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '0') {
-										updateEvent(event.eventIdentification, 'FIXED', ()=>{
-											prevData = data
-										})
-									}
+									if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
+										newEvent = false
+									} 							
 								})
+								if (newEvent == true) {
+									updateEvent(event.eventIdentification, 'OPEN', ()=>{
+										prevData = data
+									})
+								}
 							}
 						})
 						// products transaction check
