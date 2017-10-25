@@ -71,14 +71,15 @@ listenToLogs((path) => {
 								else {
 									prevEvents.every((prevEvent, index) => {
 										console.log(2)
-										if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
-											console.log(3)
-											updateEvent(event.eventIdentification, 'FIXED', ()=>{
-												prevEvents.splice(index, 1)
-											})
-											return false
-										} else
-											return true
+										if (prevEvent !== undefined)
+											if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
+												console.log(3)
+												updateEvent(event.eventIdentification, 'FIXED', ()=>{
+													delete prevEvents[index]
+												})
+												return false
+											} else
+												return true
 									})
 								}
 							} else if (event.eventActivity == '1') {
