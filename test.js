@@ -66,20 +66,19 @@ listenToLogs((path) => {
 						data.events.map((event) => {
 							console.log(1)
 							if (event.eventActivity == '0') {
+								console.log(1.5)
 								if (prevEvents == undefined || prevEvents == [])
 									console.log("previous events are empty")
 								else {
-									prevEvents.every((prevEvent, index) => {
+									prevEvents.forEach((prevEvent, index) => {
 										console.log(2)
 										if (prevEvent !== undefined)
 											if (prevEvent.eventIdentification == event.eventIdentification && prevEvent.eventActivity == '1') {
 												console.log(3)
+												delete prevEvents[index]
 												updateEvent(event.eventIdentification, 'FIXED', ()=>{
-													delete prevEvents[index]
 												})
-												return false
-											} else
-												return true
+											}
 									})
 								}
 							} else if (event.eventActivity == '1') {
