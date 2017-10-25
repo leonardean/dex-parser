@@ -5,7 +5,15 @@ var fs = require('fs')
 var dirPath = "/home/pi/Documents/vendingCPDataBuffer/"
 var filePath = dirPath + "dexRaw/dex_data.txt"
 var prevDataPath = dirPath + "dexJson/prev_data.txt"
-var prevData = JSON.parse(fs.readFileSync(dirPath + "dexJson/prev_data.txt", 'utf8')) || undefined
+var prevData = undefined
+try {
+	prevData = JSON.parse(fs.readFileSync(dirPath + "dexJson/prev_data.txt", 'utf8'))
+} catch (e) {
+	console.log(e)
+} finally {
+
+}
+
 var remainingUnit = 8890
 
 var eventName2Code = {
