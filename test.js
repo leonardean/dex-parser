@@ -56,7 +56,7 @@ listenToLogs((path) => {
 
 						var currEvents = data.events == undefined ? undefined : data.events.map((event) => {
 							if (event.eventActivity == '0') {
-								if (prevevents == undefined || prevEvents == [])
+								if (prevEvents == undefined || prevEvents == [])
 									console.log("previous events are empty")
 								else {
 									prevEvents.forEach((prevEvent) => {
